@@ -8,7 +8,7 @@ import WorkTime from './components/WorkTime.vue'
 export default {
   name: 'App',
   components: {
-    HelloWorld
+    WorkTime
   }
 }
 </script>
