@@ -11,4 +11,4 @@ Vue.prototype.$api = api;
 new Vue({
   el: '#app',
   render: h => h(App)
-});
+}); 
