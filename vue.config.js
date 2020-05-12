@@ -10,7 +10,7 @@ module.exports = {
       port: 8089,
       proxy: {
           '/proxy/*': {
-              target: 'http://113.108.62.204:8090/',
+              target: 'http://113.108.62.204:8090/', // 测试环境
               // target: 'http://0.0.0.0:9999/', // 本地环境
               // target: 'https://www.easy-mock.com/mock/5bce871a98c3e07240b7e07e/jimilbs',
               changeOrigin: true,

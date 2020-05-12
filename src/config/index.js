@@ -18,7 +18,8 @@ export default {
    */
     baseUrl: {
         dev: '',
-        pro: 'http://113.108.62.204:8090/'
+        pro: '',
+        // pro: 'http://113.108.62.204:8090'
     },
     /**
    * @description 默认打开的首页的路由name值，默认为home

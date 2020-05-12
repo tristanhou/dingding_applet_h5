@@ -28,7 +28,7 @@
         </el-col>
       </el-form-item>
 
-      <el-form-item label="百分比(%)" prop="percent" class="is-required" >
+      <el-form-item label="进度百分比(%)" prop="percent" class="is-required" >
        <el-input type="number" v-model.number="ruleForm.percent" min="0" placeholder="请输入百分比"></el-input>
       </el-form-item>
       <el-form-item label="当天耗时(h)" prop="jobDuration" class="is-required">
@@ -38,7 +38,7 @@
        <el-input type="textarea" v-model="ruleForm.jobContent"></el-input>
       </el-form-item>
       <el-form-item label="困难和求助" prop="difficultiesAppeals">
-       <el-input type="textarea" v-model="ruleForm.difficultiesAppeals" ></el-input>
+       <el-input type="textarea" v-model="ruleForm.difficultiesAppeals"></el-input>
       </el-form-item>
       <el-button type="primary" @click="submitForm('ruleForm')" style="margin-top: 16px">提交申请</el-button>
     </el-form>
@@ -126,7 +126,7 @@ export default {
           { max: 300, message: '长度不能大于 300 个字符', trigger: 'blur' }
         ],
         jobDuration: [
-          {validator: checkJobDuration, trigger: 'change'},
+          {validator: checkJobDuration, trigger: 'blur'},
         ]
       }
     };
@@ -136,6 +136,8 @@ export default {
      * 获取用户 code 授权码, 后台可通过 code 与 access_token 获取用户信息
     */
     // this.pdtList = await this.getPdtList();
+    const date = new Date()
+    this.ruleForm.dailyDate = date.getFullYear() + '-' + Number(date.getMonth() + 1) + '-' + date.getDate()
     this.getPdtList();
   
     this.init()
@@ -144,7 +146,10 @@ export default {
   methods: {
     // 初始化数据, 获取 code, userid, 用户信息
     async init() {
-      const data = await this.getUserInfo()
+      const code = await this.getCode()
+      const userId = await this.getUserId(code)
+      this.getUserInfo(userId)
+     
       debugger
     },
     // 通过 corpId 获取用户 code，后台需要通过 code 获取 userid 
@@ -154,13 +159,14 @@ export default {
       dd.ready(function() {
     // dd.ready参数为回调函数，在环境准备就绪时触发，jsapi的调用需要保证在该回调函数触发后调用，否则无效。
         dd.runtime.permission.requestAuthCode({
-          corpId: "ding971c712e65652d5335c2f4657eb6378f",
+          // corpId: "ding971c712e65652d5335c2f4657eb6378f",
+          corpId: "ding4b1a8642b4684ac5f2c783f7214b6d69",
           onSuccess: function(result) {
-            alert(result.code)
-            that.ruleForm.content = result.code
             resolve(result.code)
           },
-          onFail : function(err) {}
+          onFail : function(err) {
+            alert(err)
+          }
         });
       });
       })
@@ -169,19 +175,16 @@ export default {
     // 获取 userId
     getUserId(code) {
       return new Promise ((resolve, reject) => {
-        this.$http.get(this.$api.GET_DINGDING_USERID, {'code': '547a9e1fb3ac33ab83f88d2dbbbf4f3a'}).then((req, res) => {
-          resolve(res)
-          debugger
+        this.$http.get(this.$api.GET_DINGDING_USERID, {'code': code}).then((res) => {
+          resolve(res.data.userid)
         }).catch(e => alert(e));
       })
     },
     // 获取用户信息
-    getUserInfo() {
+    getUserInfo(userId) {
       return new Promise ((resolve, reject) => {
-        this.$http.get(this.$api.GET_DINGDING_USERINFO, {'user_id': '0555565151841213'}).then((res) => {
-          resolve(res)
+        this.$http.get(this.$api.GET_DINGDING_USERINFO, {'user_id': userId}).then((res) => {
           this.userInfo = res.data
-          debugger
         }).catch(e => alert(e));
       })
     },
@@ -206,6 +209,8 @@ export default {
     },
     // 根据 pdtId 获取项目列表
     getProjectList(id) {
+      this.projectList = [];
+      this.ruleForm.projectId = '';
       return new Promise ((resolve, reject) => {
         this.$http.get(this.$api.GET_DINGDING_PROJECT, {pdtId: id}).then((res) => {
           // resolve(res)
@@ -215,6 +220,7 @@ export default {
             data.push({value: element.id, label: element.projectName})
           });
           this.projectList = data;
+          this.ruleForm.projectId = data.length != 0 ? data[0].value : '';
           debugger
         }).catch(e => alert(e));
       })  
@@ -251,7 +257,11 @@ export default {
         onSuccess : function() {
           //onSuccess将在点击button之后回调
           /*回调*/
-          that.$refs['ruleForm'].resetFields();
+          // that.$refs['ruleForm'].resetFields();
+          that.ruleForm.difficultiesAppeals = '';
+          that.ruleForm.percent = '';
+          that.ruleForm.jobDuration = '';
+          that.ruleForm.jobContent = '';
         //   dd.biz.navigation.goBack({
         //     onSuccess : function(result) {
         //         /*result结构

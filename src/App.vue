@@ -21,4 +21,10 @@ export default {
   color: #2c3e50;
   /* margin-top: 60px; */
 }
+textarea { 
+  -webkit-appearance: none;
+}
+input[type="text"] {
+  -webkit-appearance: none;
+}
 </style>
